@@ -67,7 +67,7 @@ main{padding:10px}
 .opt .sw{width:28px;height:28px;border-radius:8px;border:1px solid #00000022;flex:none}
 .opt .r{margin-left:auto;font-size:13px;color:var(--mut);text-align:right}
 .opt.warn .r{color:var(--bad);font-weight:700}
-.opt.dis{opacity:.45}
+.opt.dis,.opt:disabled{opacity:.45}
 .btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .btn{flex:1;min-height:52px;border-radius:12px;background:#f1eee8;font-weight:700;padding:6px 10px;min-width:120px}
 .btn.pri{background:var(--acc);color:#fff}
@@ -122,7 +122,7 @@ textarea{resize:vertical}
 'use strict';
 /* Irati Sukaldea · mugikorra (prototipo, semana). Mismo formato de datos que Sukaldea de escritorio
    (src/index.html): employees / shifts / services; los turnos van en medias horas desde las 06:00. */
-const VERSION='0.1.0';
+const VERSION='0.2.0';
 const KEY='irati_sukaldea_movil_v1';
 const START_H=6, SLOTS=38;   // 06:00 – 01:00, como Sukaldea de escritorio
 const DAYS_EU=['Astelehena','Asteartea','Asteazkena','Osteguna','Ostirala','Larunbata','Igandea'];
@@ -492,18 +492,76 @@ function drawWeek(){
   return c;
 }
 function fit(g,t,w){if(g.measureText(t).width<=w)return t;while(t.length>1&&g.measureText(t+'…').width>w)t=t.slice(0,-1);return t+'…'}
-async function shareImage(){
-  const ds=new Set(weekDays()),n=S.shifts.filter(s=>ds.has(s.date)&&kitchenIds().has(s.emp)).length;
-  if(!n){toast('Aste hau hutsik dago · Esta semana está vacía',3000);return}
-  const c=drawWeek(),name=`irati-sukaldea-${ymd(st.week)}.png`;
+/* ---------- imagen del mes (como su Excel: semanas una debajo de otra) ---------- */
+// cada semana es del mes de su lunes, igual que Sukaldea de escritorio
+const monthOf=w=>new Date(w.getFullYear(),w.getMonth(),1);
+function monthWeeks(m){let w=monday(m);if(w.getMonth()!==m.getMonth()||w.getFullYear()!==m.getFullYear())w=addDays(w,7);
+  const out=[];while(w.getMonth()===m.getMonth()&&w.getFullYear()===m.getFullYear()){out.push(w);w=addDays(w,7)}return out}
+const daysOf=w=>[...Array(7)].map((_,i)=>ymd(addDays(w,i)));
+const hoursIn=(e,days)=>{const ds=new Set(days);return S.shifts.filter(s=>s.emp===e.id&&ds.has(s.date)).reduce((a,s)=>a+hrs(s),0)};
+function drawMonth(m){
+  const weeks=monthWeeks(m),W=1080,P=20,CW=(W-P*2)/7,RH=40,EMPTY='#ececec';
+  const ids0=kitchenIds();
+  // las semanas sin ningún turno no salen (como su Excel, que solo enseña las semanas hechas)
+  const plan=weeks.map((w,wi)=>({w,wi})).filter(({w})=>{const ds=new Set(daysOf(w));return S.shifts.some(s=>ds.has(s.date)&&ids0.has(s.emp))}).map(({w,wi})=>{const days=daysOf(w);
+    const rows=svcList().map(v=>{const per=days.map(d=>dayShifts(d).filter(s=>s.task===v.id).sort(sortShifts));return {v,per,n:Math.max(...per.map(p=>p.length))}}).filter(r=>r.n>0||r.v.id!=='lunch').map(r=>({...r,n:Math.max(r.n,1)}));
+    const rest=days.map(d=>dayShifts(d).filter(s=>!svc(s.task)).sort(sortShifts)),rn=Math.max(0,...rest.map(p=>p.length));if(rn)rows.push({v:null,per:rest,n:rn});
+    const hrsL=cooks().filter(e=>!e.archived||hoursIn(e,days)>0).map(e=>({e,h:hoursIn(e,days)}));
+    const hLines=Math.ceil(hrsL.length/7);
+    return {w,wi,days,rows,hrsL,hLines,h:44+58+rows.reduce((a,r)=>a+r.n*RH,0)+hLines*38+22}});
+  const legend=S.services.flatMap(v=>v.slots.map(z=>({v,z}))).filter(x=>x.v.id!=='lunch'||plan.some(p=>p.days.some(d=>dayShifts(d).some(s=>s.task==='lunch'))));
+  const LW=430,LH=36,H=86+plan.reduce((a,p)=>a+p.h,0)+20+legend.length*LH+P;
+  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,W,H);g.textBaseline='middle';
+  g.fillStyle='#1d1d1b';g.fillRect(0,0,W,70);g.fillStyle='#fff';g.font='800 30px system-ui,sans-serif';g.fillText('IRATI · SUKALDEA',P,35);
+  g.textAlign='right';g.font='600 26px system-ui,sans-serif';g.fillText(`${cap(MON_EU[m.getMonth()])} · ${cap(MON_ES[m.getMonth()])} ${m.getFullYear()}`,W-P,35);g.textAlign='left';
+  let y=86;const line=(x1,y1,x2,y2,w)=>{g.lineWidth=w||1;g.strokeStyle='#1d1d1b';g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke()};
+  plan.forEach(p=>{const wi=p.wi;
+    const a=parse(p.days[0]),b=parse(p.days[6]),rng=a.getMonth()===b.getMonth()?`${a.getDate()}-${b.getDate()}`:`${a.getDate()}/${a.getMonth()+1}-${b.getDate()}/${b.getMonth()+1}`;
+    const top=y;g.textAlign='center';g.fillStyle='#1d1d1b';g.font='700 22px system-ui,sans-serif';g.fillText(`${wi+1}. astea · Semana ${wi+1} (${rng})`,W/2,y+22);y+=44;
+    p.days.forEach((d,i)=>{const x=P+i*CW;g.fillStyle=i>=5?'#f3efe6':'#fff';g.fillRect(x,y,CW,58);g.fillStyle='#1d1d1b';
+      g.font='400 16px system-ui,sans-serif';g.fillText(DAYS_EU[i],x+CW/2,y+17);g.font='700 19px system-ui,sans-serif';g.fillText(`${DAYS_ES[i]} ${parse(d).getDate()}`,x+CW/2,y+40)});
+    line(P,y+58,W-P,y+58,2);y+=58;
+    for(const r of p.rows){for(let k=0;k<r.n;k++){p.days.forEach((d,i)=>{const x=P+i*CW,s=r.per[i][k];
+        if(!s){g.fillStyle=EMPTY;g.fillRect(x,y,CW,RH);return}
+        const z=slotOf(s),bg=z?z.color:NOSVC,e=emp(s.emp);g.fillStyle=bg;g.fillRect(x,y,CW,RH);g.fillStyle=textOn(bg);
+        if(offSlot(s)){g.font='600 17px system-ui,sans-serif';const nm=fit(g,e?e.name:'?',CW*0.5);const t=`${tl(s.start)}-${tl(s.end)}`;
+          g.textAlign='left';const tw0=g.measureText(nm).width;g.font='700 13px system-ui,sans-serif';const tw=g.measureText(t).width+8;const x0=x+(CW-tw0-tw-6)/2;
+          g.font='600 17px system-ui,sans-serif';g.fillText(nm,x0,y+RH/2);g.fillStyle='#000';g.fillRect(x0+tw0+6,y+10,tw,RH-20);g.fillStyle='#fff';g.font='700 13px system-ui,sans-serif';g.fillText(t,x0+tw0+10,y+RH/2);g.textAlign='center'}
+        else{g.font='500 20px system-ui,sans-serif';g.fillText(fit(g,e?e.name:'?',CW-8),x+CW/2,y+RH/2)}});
+      line(P,y+RH,W-P,y+RH,.5);y+=RH}}
+    line(P,y,W-P,y,2);
+    p.hrsL.forEach((r,i)=>{const x=P+(i%7)*CW,yy=y+Math.floor(i/7)*38;const ov=typeof r.e.contract==='number'&&r.h>r.e.contract;
+      g.fillStyle=ov?'#c62828':'#1d1d1b';g.font='500 19px system-ui,sans-serif';g.fillText(fit(g,r.h?`${r.e.name} ${fmtH(r.h)}`:r.e.name,CW-6),x+CW/2,yy+19)});
+    y+=p.hLines*38;
+    g.strokeStyle='#1d1d1b';g.lineWidth=2;g.strokeRect(P,top+34,W-P*2,y-top-34);for(let i=1;i<7;i++)line(P+i*CW,top+34,P+i*CW,y-p.hLines*38,.5);
+    g.textAlign='left';y+=22});
+  // leyenda como la de su Excel: franja y horas
+  const lx=W-P-LW;legend.forEach((x,i)=>{const yy=y+i*LH;g.fillStyle=x.z.color;g.fillRect(lx,yy,LW,LH);g.strokeStyle='#1d1d1b';g.lineWidth=1;g.strokeRect(lx+.5,yy+.5,LW-1,LH);
+    g.fillStyle=textOn(x.z.color);g.textAlign='center';g.font='600 19px system-ui,sans-serif';g.fillText(`${tl(x.z.start)} - ${tl(x.z.end)}  ${fmtH((x.z.end-x.z.start)/2)}h · ${x.v.name}`,lx+LW/2,yy+LH/2);g.textAlign='left'});
+  g.fillStyle='#6b6760';g.font='400 16px system-ui,sans-serif';g.fillText('Orduak = asteko orduak · Horas de la semana',P,y+16);
+  return c;
+}
+async function shareCanvas(c,name,eu,es){
   const blob=await new Promise(r=>c.toBlob(r,'image/png'));
   const r=blob?await shareFile(blob,name,'Irati Sukaldea'):null;
   if(r==='shared'||r==='cancel')return;
   // alternativa: se enseña la imagen para mantenerla pulsada (Compartir / Descargar imagen)
   const url=c.toDataURL('image/png');
-  openSheet(`<h2>${T('Asteko irudia','Imagen de la semana')}</h2><div class="hint">${T('Luze sakatu irudia → Partekatu edo Deskargatu.','Mantén pulsada la imagen → Compartir o Descargar imagen.')}</div><div class="imgview"><img id="wkImg" alt="Irati Sukaldea" src="${url}"></div>
+  openSheet(`<h2>${T(eu,es)}</h2><div class="hint">${T('Luze sakatu irudia → Partekatu edo Deskargatu.','Mantén pulsada la imagen → Compartir o Descargar imagen.')}</div><div class="imgview"><img id="wkImg" alt="Irati Sukaldea" src="${url}"></div>
   <div class="btns"><button class="btn" id="iDl">${T('Deskargatu','Descargar')}</button><button class="btn" id="iClose">${T('Itxi','Cerrar')}</button></div>`);
   $('#iDl').onclick=()=>{if(blob&&download(blob,name))toast('Deskargatuta · Descargado',2500)};$('#iClose').onclick=closeSheet;
+}
+function shareImage(){
+  const m=monthOf(st.week),ids=kitchenIds();
+  const mDays=new Set(monthWeeks(m).flatMap(daysOf)),wDays=new Set(weekDays());
+  const nm=S.shifts.filter(s=>mDays.has(s.date)&&ids.has(s.emp)).length,nw=S.shifts.filter(s=>wDays.has(s.date)&&ids.has(s.emp)).length;
+  openSheet(`<h2>${T('Zein irudi?','¿Qué imagen?')}</h2><div class="list">
+  <button class="opt" id="imMonth"${nm?'':' disabled'}><b>${T('Hilabete osoa','Mes entero')}</b><span class="r">${esc(cap(MON_EU[m.getMonth()]))} · ${esc(MON_ES[m.getMonth()])}<br>${nm} txanda</span></button>
+  <button class="opt" id="imWeek"${nw?'':' disabled'}><b>${T('Aste hau','Esta semana')}</b><span class="r">${esc(weekTitle(st.week,'es'))}<br>${nw} txanda</span></button></div>
+  ${nm||nw?'':`<div class="hint">${T('Ez dago txandarik.','No hay turnos.')}</div>`}`);
+  $('#imMonth').onclick=()=>{closeSheet();shareCanvas(drawMonth(m),`irati-sukaldea-${m.getFullYear()}-${pad(m.getMonth()+1)}.png`,'Hilabeteko irudia','Imagen del mes')};
+  $('#imWeek').onclick=()=>{closeSheet();shareCanvas(drawWeek(),`irati-sukaldea-${ymd(st.week)}.png`,'Asteko irudia','Imagen de la semana')};
 }
 $('#imgBtn').onclick=shareImage;
 
@@ -518,7 +576,7 @@ function toast(msg,ms=2200,withUndo=false){
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
 if(!storeOK)renderBanners();
 render();
-window.IRATI_MOVIL={get S(){return S},valid,drawWeek,importData,VERSION};
+window.IRATI_MOVIL={get S(){return S},valid,drawWeek,drawMonth,monthWeeks,importData,VERSION};
 </script>
 </body>
 </html>
