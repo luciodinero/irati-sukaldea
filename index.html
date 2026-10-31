@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="eu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d1d1b">
+<title>Irati Sukaldea</title>
+<style>
+:root{--bg:#f4f2ee;--card:#fff;--ink:#1d1d1b;--mut:#6b6760;--line:#e2ded6;--acc:#0a7a3c;--bad:#c62828;--r:14px;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.3 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(84px + var(--safe-b));overflow-x:hidden}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.es{display:block;font-size:.72em;opacity:.62;font-weight:400}
+.in .es{display:inline;margin-left:6px}
+header{position:sticky;top:0;z-index:5;background:var(--ink);color:#fff;padding:calc(8px + var(--safe-t)) 10px 8px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.brand{font-weight:800;letter-spacing:.06em;font-size:15px}
+.brand small{font-weight:400;opacity:.7;letter-spacing:0;margin-left:6px}
+.iconbtn{min-width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:22px}
+.iconbtn:active{background:#ffffff22}
+.wk{display:flex;align-items:center;gap:4px;margin-top:4px}
+.wk .lbl{flex:1;text-align:center;font-weight:700;font-size:17px}
+.wk .lbl .es{color:#fff}
+.wk .nav{width:48px;height:48px;border-radius:12px;background:#ffffff1a;font-size:24px;color:#fff}
+.today{font-size:13px;padding:0 10px;height:32px;border-radius:16px;background:#ffffff1a;color:#fff}
+.banner{margin:10px 10px 0;padding:10px 12px;border-radius:12px;background:#fff3cd;border:1px solid #f0d27a;font-size:14px;display:flex;gap:10px;align-items:center}
+.banner button{margin-left:auto;background:var(--ink);color:#fff;border-radius:10px;padding:8px 12px;font-size:14px;flex:none}
+.banner.err{background:#fde8e8;border-color:#f3b4b4}
+main{padding:10px}
+.day{background:var(--card);border-radius:var(--r);margin-bottom:12px;box-shadow:0 1px 2px #0000000f;overflow:hidden}
+.day.istoday{outline:2px solid var(--acc)}
+.dh{display:flex;align-items:baseline;gap:8px;padding:10px 12px 6px;border-bottom:1px solid var(--line)}
+.dh b{font-size:17px}
+.dh .es{display:inline;font-size:13px}
+.dh .dn{margin-left:auto;font-size:13px;color:var(--mut)}
+.row{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.rl{width:78px;flex:none;font-size:13px;font-weight:700;padding-top:10px;color:var(--mut)}
+.rl .es{font-size:11px}
+.chips{flex:1;display:flex;flex-wrap:wrap;gap:6px;min-width:0}
+.chip{min-height:44px;padding:4px 10px;border-radius:10px;border:1px solid #00000022;display:flex;flex-direction:column;justify-content:center;max-width:100%;text-align:left}
+.chip b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip small{font-size:12px;opacity:.85;white-space:nowrap}
+.chip .odd{background:#000;color:#fff;border-radius:4px;padding:0 4px}
+.chip.conf{outline:3px solid var(--bad);outline-offset:1px}
+.add{min-width:44px;height:44px;border-radius:10px;border:2px dashed #bdb7ab;color:var(--mut);font-size:24px;line-height:1}
+.add:active{background:#00000008}
+.dfoot{padding:4px 10px 10px;display:flex;justify-content:flex-end}
+.small{font-size:13px;color:var(--mut);padding:8px 10px;border-radius:10px;min-height:40px}
+.small:active{background:#00000008}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:8px 8px calc(8px + var(--safe-b))}
+.bar button{min-height:56px;border-radius:12px;background:#f1eee8;font-weight:700;font-size:14px;padding:4px}
+.bar button.pri{background:var(--acc);color:#fff}
+.bar .ic{display:block;font-size:20px}
+.shade{position:fixed;inset:0;background:#0007;z-index:20;display:flex;align-items:flex-end}
+.shade[hidden]{display:none}
+.sheet{background:#fff;width:100%;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:14px 14px calc(16px + var(--safe-b))}
+.sheet h2{margin:2px 0 4px;font-size:19px}
+.sheet h2 .es{font-size:14px}
+.sheet .sub{color:var(--mut);font-size:14px;margin-bottom:10px}
+.grip{width:40px;height:5px;background:#ccc;border-radius:3px;margin:0 auto 10px}
+.list{display:flex;flex-direction:column;gap:8px}
+.opt{min-height:54px;border-radius:12px;border:1px solid var(--line);background:#faf9f6;display:flex;align-items:center;gap:10px;padding:8px 12px;text-align:left;font-size:17px}
+.opt:active{background:#efece6}
+.opt .sw{width:28px;height:28px;border-radius:8px;border:1px solid #00000022;flex:none}
+.opt .r{margin-left:auto;font-size:13px;color:var(--mut);text-align:right}
+.opt.warn .r{color:var(--bad);font-weight:700}
+.opt.dis{opacity:.45}
+.btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{flex:1;min-height:52px;border-radius:12px;background:#f1eee8;font-weight:700;padding:6px 10px;min-width:120px}
+.btn.pri{background:var(--acc);color:#fff}
+.btn.bad{background:#fde8e8;color:var(--bad)}
+.field{display:flex;flex-direction:column;gap:4px;margin:8px 0;font-size:14px;color:var(--mut)}
+.field select,.field input,.field textarea{font:inherit;font-size:17px;color:var(--ink);padding:10px;border-radius:10px;border:1px solid #cfc9bd;background:#fff;min-height:48px;width:100%}
+.two{display:flex;gap:8px}.two>*{flex:1}
+table.h{width:100%;border-collapse:collapse;font-size:16px}
+table.h th{font-size:12px;color:var(--mut);text-align:right;font-weight:600;padding:6px 4px}
+table.h th:first-child,table.h td:first-child{text-align:left}
+table.h td{padding:10px 4px;border-top:1px solid var(--line);text-align:right}
+table.h td.ov{color:var(--bad);font-weight:700}
+.cook{display:flex;gap:8px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.cook input[type=text]{flex:1;min-width:0}
+.cook input{font:inherit;font-size:16px;padding:8px;border-radius:10px;border:1px solid #cfc9bd;min-height:44px}
+.cook .ct{width:64px}
+.cook .tg{min-height:44px;padding:0 10px;border-radius:10px;background:#e8f5ec;color:var(--acc);font-weight:700;font-size:13px;flex:none}
+.cook .tg.off{background:#eee;color:#777}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(92px + var(--safe-b));z-index:30;background:var(--ink);color:#fff;border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:center;font-size:15px;transform:translateY(20px);opacity:0;pointer-events:none;transition:.2s}
+#toast.on{transform:none;opacity:1;pointer-events:auto}
+#toast button{margin-left:auto;color:#9fe0b6;font-weight:800;min-height:40px;padding:0 6px}
+.imgview img{width:100%;border-radius:8px;border:1px solid var(--line);display:block}
+.hint{font-size:14px;background:#f1eee8;border-radius:10px;padding:10px;margin:10px 0}
+.empty{text-align:center;color:var(--mut);padding:30px 16px}
+textarea{resize:vertical}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="brand">IRATI · SUKALDEA<small>mugikorra · móvil</small></div>
+    <button class="iconbtn" id="menuBtn" aria-label="Menua · Menú">☰</button>
+  </div>
+  <div class="wk">
+    <button class="nav" id="prevW" aria-label="Aurreko astea · Semana anterior">‹</button>
+    <div class="lbl" id="wkLbl"></div>
+    <button class="nav" id="nextW" aria-label="Hurrengo astea · Semana siguiente">›</button>
+  </div>
+</header>
+<div id="banners"></div>
+<main id="days"></main>
+<nav class="bar">
+  <button id="hoursBtn"><span class="ic">⏱</span>Orduak<span class="es">Horas</span></button>
+  <button id="copyBtn"><span class="ic">⧉</span>Aurreko astea<span class="es">Copiar anterior</span></button>
+  <button id="imgBtn" class="pri"><span class="ic">⇪</span>Irudia<span class="es">Enviar imagen</span></button>
+</nav>
+<div class="shade" id="shade" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="toast" role="status"><span id="toastTxt"></span><button id="toastBtn" hidden></button></div>
+<input type="file" id="fileIn" accept=".json,application/json,text/plain" hidden>
+
+<script>
+'use strict';
+/* Irati Sukaldea · mugikorra (prototipo, semana). Mismo formato de datos que Sukaldea de escritorio
+   (src/index.html): employees / shifts / services; los turnos van en medias horas desde las 06:00. */
+const VERSION='0.1.0';
+const KEY='irati_sukaldea_movil_v1';
+const START_H=6, SLOTS=38;   // 06:00 – 01:00, como Sukaldea de escritorio
+const DAYS_EU=['Astelehena','Asteartea','Asteazkena','Osteguna','Ostirala','Larunbata','Igandea'];
+const DAYS_ES=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+const DS_EU=['AL','AR','AZ','OG','OR','LR','IG'];
+const DS_ES=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+const MON_EU=['urtarrila','otsaila','martxoa','apirila','maiatza','ekaina','uztaila','abuztua','iraila','urria','azaroa','abendua'];
+const MON_ES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+// mismas franjas y colores que Sukaldea de escritorio (DEF_SERVICES)
+const DEF_SERVICES=[
+  {id:'pintxo',name:'Pintxoak',slots:[{id:'p0611',start:0,end:10,color:'#ffffd6'}]},
+  {id:'bazkari',name:'Bazkariak',slots:[{id:'b1017',start:8,end:22,color:'#c7a2e3'},{id:'b1117',start:10,end:22,color:'#b8fe82'},{id:'b1217',start:12,end:22,color:'#dbfec0'}]},
+  {id:'afari',name:'Afariak',slots:[{id:'a1700',start:22,end:36,color:'#fe9ec5'},{id:'a1800',start:24,end:36,color:'#40afff'},{id:'a1900',start:26,end:36,color:'#7fcaff'},{id:'a2000',start:28,end:36,color:'#bfe4ff'}]},
+  {id:'lunch',name:'Lunch',slots:[{id:'l1117',start:10,end:22,color:'#ffb347'}]}
+];
+const SVC_ES={pintxo:'Pintxos',bazkari:'Comidas',afari:'Cenas',lunch:'Lunch'};
+const COOK_PAL=['#c1121f','#7b2cbf','#f15bb5','#00a6a6','#8d6e63','#bc6c25','#b5838d','#2563eb','#16a34a','#ea580c'];
+const NOSVC='#e6e3dc';
+
+const $=s=>document.querySelector(s);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const monday=d=>{const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());return addDays(x,-((x.getDay()+6)%7))};
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const tl=slot=>{const m=(START_H*60+slot*30)%1440;return pad(Math.floor(m/60))+':'+pad(m%60)};
+// horas reales (correcto también la noche del cambio de hora), igual que escritorio
+const at=(date,slot)=>{const[y,m,d]=date.split('-').map(Number);return new Date(y,m-1,d,START_H,slot*30)};
+const hrs=s=>Math.round((at(s.date,s.end)-at(s.date,s.start))/18e5)/2;
+const fmtH=n=>Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',');
+const T=(eu,es)=>`${esc(eu)}<span class="es">${esc(es)}</span>`;
+function textOn(hex){const c=hex.replace('#','');const r=parseInt(c.substr(0,2),16),g=parseInt(c.substr(2,2),16),b=parseInt(c.substr(4,2),16);return (0.299*r+0.587*g+0.114*b)>150?'#000':'#fff'}
+
+/* ---------- datos ---------- */
+const seed=()=>({employees:[],shifts:[],absences:[],notes:[],exports:{},special:{},settings:{svcVer:2},services:JSON.parse(JSON.stringify(DEF_SERVICES))});
+const DRE=/^\d{4}-\d{2}-\d{2}$/;
+function valid(d){
+  if(!d||typeof d!=='object'||!Array.isArray(d.employees)||!Array.isArray(d.shifts))return false;
+  const ids=new Set();
+  for(const e of d.employees){if(!e||typeof e.id!=='string'||typeof e.name!=='string'||!/^#[0-9a-f]{6}$/i.test(e.color)||!['barra','sukaldea'].includes(e.section))return false;
+    if(e.contract!=null&&!(typeof e.contract==='number'&&e.contract>=0&&e.contract<=168))return false;ids.add(e.id)}
+  for(const s of d.shifts){if(!s||typeof s.id!=='string'||!ids.has(s.emp)||!DRE.test(s.date)||!Number.isInteger(s.start)||!Number.isInteger(s.end)||s.start<0||s.end>SLOTS||s.end<=s.start)return false;
+    if((s.task!=null&&typeof s.task!=='string')||(s.slot!=null&&typeof s.slot!=='string'))return false}
+  if(d.services!==undefined){if(!Array.isArray(d.services))return false;
+    for(const v of d.services){if(!v||typeof v.id!=='string'||typeof v.name!=='string'||!Array.isArray(v.slots))return false;
+      for(const z of v.slots)if(!z||typeof z.id!=='string'||!/^#[0-9a-f]{6}$/i.test(z.color)||!Number.isInteger(z.start)||!Number.isInteger(z.end)||z.start<0||z.end>SLOTS||z.end<=z.start)return false}}
+  if(d.settings!==undefined&&(typeof d.settings!=='object'||d.settings===null||Array.isArray(d.settings)))return false;
+  return true;
+}
+function norm(d){
+  for(const k of ['absences','notes'])if(!Array.isArray(d[k]))d[k]=[];
+  for(const k of ['exports','special'])if(!d[k]||typeof d[k]!=='object'||Array.isArray(d[k]))d[k]={};
+  if(!d.settings)d.settings={};
+  if(!Array.isArray(d.services)||!d.services.length)d.services=JSON.parse(JSON.stringify(DEF_SERVICES));
+  d.services=d.services.filter(v=>Array.isArray(v.slots)&&v.slots.length);
+  if(!d.settings.svcVer)d.settings.svcVer=2;
+  return d;
+}
+let storeOK=true,storeMsg='';
+function readStore(k){try{return localStorage.getItem(k)}catch(e){storeOK=false;return null}}
+function load(){
+  const r=readStore(KEY);
+  if(r){try{const d=JSON.parse(r);if(valid(d))return norm(d)}catch(e){}
+    // dañado: se aparta y se prueba la copia anterior
+    try{localStorage.setItem(KEY+'_kaltetuta_'+Date.now(),r)}catch(e){}
+    const p=readStore(KEY+'_prev');
+    if(p){try{const d=JSON.parse(p);if(valid(d)){storeMsg='recovered';return norm(d)}}catch(e){}}
+    storeMsg='damaged';
+  }
+  return seed();
+}
+let S=load();
+function save(){
+  const json=JSON.stringify(S);
+  try{const cur=localStorage.getItem(KEY);if(cur&&cur!==json)localStorage.setItem(KEY+'_prev',cur);localStorage.setItem(KEY,json);storeOK=true}
+  catch(e){if(storeOK){storeOK=false;renderBanners()}}
+}
+const hist=[];
+function snap(){hist.push(JSON.stringify(S));if(hist.length>60)hist.shift()}
+function undo(){if(!hist.length)return;S=norm(JSON.parse(hist.pop()));save();render();toast('Desegina · Deshecho')}
+
+const cooks=()=>S.employees.filter(e=>e.section==='sukaldea');
+const active=()=>cooks().filter(e=>!e.archived);
+const emp=id=>S.employees.find(e=>e.id===id);
+const svc=id=>S.services.find(v=>v.id===id);
+const slotOf=t=>{const v=svc(t.task);return v?(v.slots.find(z=>z.id===t.slot)||null):null};
+const svcList=()=>{const v=[...S.services];const li=v.findIndex(x=>x.id==='lunch');if(li>=0){const[l]=v.splice(li,1);v.push(l)}return v};
+const svcEs=v=>SVC_ES[v.id]||'';
+const kitchenIds=()=>new Set(cooks().map(e=>e.id));
+const dayShifts=d=>{const ids=kitchenIds();return S.shifts.filter(s=>s.date===d&&ids.has(s.emp))};
+const sortShifts=(a,b)=>{const za=slotOf(a),zb=slotOf(b);return (za?za.start:a.start)-(zb?zb.start:b.start)||a.start-b.start||cooks().indexOf(emp(a.emp))-cooks().indexOf(emp(b.emp))};
+function conflicts(list){const c=new Set();for(let i=0;i<list.length;i++)for(let j=i+1;j<list.length;j++){const a=list[i],b=list[j];if(a.emp===b.emp&&a.start<b.end&&b.start<a.end){c.add(a.id);c.add(b.id)}}return c}
+const offSlot=s=>{const z=slotOf(s);return !z||z.start!==s.start||z.end!==s.end};
+
+/* ---------- estado de pantalla ---------- */
+const st={week:monday(new Date())};
+const weekDays=()=>[...Array(7)].map((_,i)=>ymd(addDays(st.week,i)));
+const weekHours=e=>{const ds=new Set(weekDays());return S.shifts.filter(s=>s.emp===e.id&&ds.has(s.date)).reduce((a,s)=>a+hrs(s),0)};
+function weekTitle(w,lang){
+  const a=w,b=addDays(w,6),M=lang==='es'?MON_ES:MON_EU;
+  return a.getMonth()===b.getMonth()?`${M[a.getMonth()]} ${a.getDate()}–${b.getDate()}`:`${M[a.getMonth()]} ${a.getDate()} – ${M[b.getMonth()]} ${b.getDate()}`;
+}
+
+/* ---------- pintar ---------- */
+function render(){
+  $('#wkLbl').innerHTML=`${esc(cap(weekTitle(st.week,'eu')))}<span class="es">${esc(cap(weekTitle(st.week,'es')))} · ${st.week.getFullYear()}</span>`;
+  renderBanners();
+  if(!cooks().length){$('#days').innerHTML=`<div class="empty"><p>${T('Lehenengo, idatzi sukaldarien izenak.','Primero, escribe los nombres de los cocineros.')}</p><div class="btns"><button class="btn pri" id="firstCooks">${T('Sukaldariak gehitu','Añadir cocineros')}</button></div><div class="btns"><button class="btn" id="firstImport">${T('Babeskopia kargatu','Cargar una copia')}</button></div></div>`;
+    $('#firstCooks').onclick=openCooks;$('#firstImport').onclick=()=>$('#fileIn').click();return}
+  const today=ymd(new Date());let h='';
+  weekDays().forEach((d,i)=>{
+    const list=dayShifts(d),conf=conflicts(list),x=parse(d);
+    h+=`<section class="day${d===today?' istoday':''}" data-date="${d}"><div class="dh"><b>${DAYS_EU[i]}</b><span class="es">${DAYS_ES[i]}</span><span class="dn">${x.getDate()} ${MON_EU[x.getMonth()].slice(0,3)}.</span></div>`;
+    for(const v of svcList()){
+      const mine=list.filter(s=>s.task===v.id).sort(sortShifts);
+      if(v.id==='lunch'&&!mine.length)continue;
+      h+=`<div class="row"><div class="rl">${T(v.name,svcEs(v))}</div><div class="chips">${mine.map(s=>chip(s,conf)).join('')}<button class="add" data-add="${v.id}" data-date="${d}" aria-label="${esc(v.name)}: gehitu · añadir">+</button></div></div>`;
+    }
+    const rest=list.filter(s=>!svc(s.task)).sort(sortShifts);
+    if(rest.length)h+=`<div class="row"><div class="rl">${T('Bestelakoak','Otros')}</div><div class="chips">${rest.map(s=>chip(s,conf)).join('')}</div></div>`;
+    if(svc('lunch')&&!list.some(s=>s.task==='lunch'))h+=`<div class="dfoot"><button class="small" data-add="lunch" data-date="${d}">+ Lunch</button></div>`;
+    h+='</section>';
+  });
+  $('#days').innerHTML=h;
+  document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addFlow(b.dataset.add,b.dataset.date));
+  document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>editFlow(c.dataset.id));
+}
+function chip(s,conf){
+  const e=emp(s.emp),z=slotOf(s),bg=z?z.color:NOSVC,fg=textOn(bg),odd=offSlot(s);
+  return `<button class="chip${conf.has(s.id)?' conf':''}" data-id="${s.id}" style="background:${bg};color:${fg}"><b>${esc(e?e.name:'?')}${conf.has(s.id)?' ⚠':''}</b><small>${odd?`<span class="odd">${tl(s.start)}–${tl(s.end)}</span>`:`${tl(s.start)}–${tl(s.end)}`}</small></button>`;
+}
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function renderBanners(){
+  let h='';
+  if(!storeOK)h+=`<div class="banner err">${T('Nabigatzaile honek ez du gordetzen uzten. Gorde babeskopia bat sarri.','Este navegador no deja guardar. Guarda una copia a menudo.')}<button data-bk>${T('Gorde','Guardar')}</button></div>`;
+  else if(storeMsg==='recovered')h+=`<div class="banner">${T('Datuak kaltetuta zeuden: aurreko bertsioa berreskuratu da.','Los datos estaban dañados: se ha recuperado la versión anterior.')}</div>`;
+  else if(storeMsg==='damaged')h+=`<div class="banner err">${T('Datuak kaltetuta zeuden. Kargatu zure azken babeskopia.','Los datos estaban dañados. Carga tu última copia.')}<button data-imp>${T('Kargatu','Cargar')}</button></div>`;
+  else if(S.shifts.length){const last=S.settings.movilBackup?new Date(S.settings.movilBackup):null;
+    if(!last||Date.now()-last>7*864e5)h+=`<div class="banner">${T(last?'Aste bat baino gehiago babeskopiarik gabe.':'Ez dago babeskopiarik oraindik.',last?'Más de una semana sin copia de seguridad.':'Todavía no hay copia de seguridad.')}<button data-bk>${T('Gorde','Guardar')}</button></div>`}
+  $('#banners').innerHTML=h;
+  document.querySelectorAll('[data-bk]').forEach(b=>b.onclick=exportBackup);
+  document.querySelectorAll('[data-imp]').forEach(b=>b.onclick=()=>$('#fileIn').click());
+}
+
+/* ---------- hoja inferior ---------- */
+let sheetClose=null;
+function openSheet(html,onClose){$('#sheet').innerHTML='<div class="grip"></div>'+html;$('#shade').hidden=false;sheetClose=onClose||null;$('#sheet').scrollTop=0}
+function closeSheet(){if($('#shade').hidden)return;$('#shade').hidden=true;$('#sheet').innerHTML='';const f=sheetClose;sheetClose=null;if(f)f()}
+$('#shade').addEventListener('click',e=>{if(e.target.id==='shade')closeSheet()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+// diálogo de confirmación propio (alert/confirm no funcionan en todos los visores)
+function ask(eu,es,okEu,okEs){return new Promise(res=>{openSheet(`<h2>${T(eu,es)}</h2><div class="btns"><button class="btn" id="aNo">${T('Ez','No')}</button><button class="btn pri" id="aYes">${T(okEu,okEs)}</button></div>`,()=>res(false));
+  $('#aNo').onclick=()=>closeSheet();$('#aYes').onclick=()=>{sheetClose=null;closeSheet();res(true)}})}
+
+/* ---------- añadir turno ---------- */
+function cookOptions(date,exclude){
+  const list=dayShifts(date);
+  return active().map(e=>{
+    const there=list.filter(s=>s.emp===e.id&&s.id!==exclude).sort((a,b)=>a.start-b.start);
+    const h=weekHours(e),ov=typeof e.contract==='number'&&h>e.contract;
+    const r=there.length?`${there.map(s=>tl(s.start)+'–'+tl(s.end)).join(', ')}`:`${fmtH(h)}${typeof e.contract==='number'?' / '+fmtH(e.contract):''} h`;
+    return `<button class="opt${there.length?' warn':''}" data-emp="${e.id}"><b>${esc(e.name)}</b><span class="r">${there.length?T('Lanean','Ya trabaja')+' '+esc(r):esc(r)+(ov?' ⚠':'')}</span></button>`;
+  }).join('');
+}
+function dayTitle(d){const x=parse(d),i=(x.getDay()+6)%7;return [`${DAYS_EU[i]} ${x.getDate()}`,`${DAYS_ES[i]} ${x.getDate()}`]}
+function addFlow(vid,date){
+  const v=svc(vid);if(!v)return;const[deu,des]=dayTitle(date);
+  if(!active().length){openCooks();return}
+  openSheet(`<h2>${T('Nor?','¿Quién?')}</h2><div class="sub">${esc(deu)} · ${esc(v.name)} — ${esc(des)} · ${esc(svcEs(v))}</div><div class="list">${cookOptions(date)}</div>`);
+  document.querySelectorAll('#sheet [data-emp]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.emp;
+    if(v.slots.length===1)return create(id,date,v,v.slots[0]);
+    pickSlot(v,(z,custom)=>{if(custom)create(id,date,v,null,custom);else create(id,date,v,z)},`${emp(id).name} · ${deu}`);
+  });
+}
+function slotButtons(v,cur){
+  return v.slots.map(z=>`<button class="opt" data-slot="${z.id}"><span class="sw" style="background:${z.color}"></span><b>${tl(z.start)} – ${tl(z.end)}</b><span class="r">${fmtH((z.end-z.start)/2)} h${cur===z.id?' ✓':''}</span></button>`).join('');
+}
+function pickSlot(v,done,sub,cur){
+  openSheet(`<h2>${T('Zein ordutan?','¿A qué hora?')}</h2><div class="sub">${esc(sub)} · ${esc(v.name)}</div><div class="list">${slotButtons(v,cur)}<button class="opt" id="custom"><span class="sw" style="background:#000"></span><b>${T('Beste ordu bat','Otra hora')}</b></button></div>`);
+  document.querySelectorAll('#sheet [data-slot]').forEach(b=>b.onclick=()=>done(v.slots.find(z=>z.id===b.dataset.slot),null));
+  $('#custom').onclick=()=>customHours(v.slots[0].start,v.slots[0].end,(a,b)=>done(v.slots[0],{start:a,end:b}),sub);
+}
+function hourOpts(from,to,cur){let h='';for(let i=from;i<=to;i++)h+=`<option value="${i}"${i===cur?' selected':''}>${tl(i)}</option>`;return h}
+function customHours(a0,b0,done,sub){
+  openSheet(`<h2>${T('Beste ordu bat','Otra hora')}</h2><div class="sub">${esc(sub||'')}</div><div class="two"><label class="field">${T('Hasiera','Entrada')}<select id="hA">${hourOpts(0,SLOTS-1,a0)}</select></label><label class="field">${T('Bukaera','Salida')}<select id="hB">${hourOpts(1,SLOTS,b0)}</select></label></div><div class="hint" id="hInfo"></div><div class="btns"><button class="btn" id="hNo">${T('Utzi','Cancelar')}</button><button class="btn pri" id="hOk">${T('Ados','Vale')}</button></div>`);
+  const info=()=>{const a=+$('#hA').value,b=+$('#hB').value;$('#hInfo').innerHTML=b>a?`${fmtH((b-a)/2)} h`:T('Bukaera hasiera baino beranduago izan behar da.','La salida tiene que ser después de la entrada.');$('#hOk').disabled=!(b>a)};
+  $('#hA').onchange=info;$('#hB').onchange=info;info();
+  $('#hNo').onclick=closeSheet;$('#hOk').onclick=()=>{const a=+$('#hA').value,b=+$('#hB').value;if(b>a)done(a,b)};
+}
+function create(empId,date,v,z,custom){
+  snap();const t={id:uid(),emp:empId,date,task:v.id,slot:(z||v.slots[0]).id,start:custom?custom.start:z.start,end:custom?custom.end:z.end};
+  S.shifts.push(t);save();closeSheet();render();
+  const c=conflicts(dayShifts(date));
+  toast(c.has(t.id)?`⚠ ${emp(empId).name}: ordutegiak gainjartzen dira · se solapan`:`${emp(empId).name} ✓`,c.has(t.id)?4500:1800,true);
+}
+
+/* ---------- editar turno ---------- */
+function editFlow(id){
+  const s=S.shifts.find(x=>x.id===id);if(!s)return;const e=emp(s.emp),v=svc(s.task),[deu,des]=dayTitle(s.date);
+  openSheet(`<h2>${esc(e?e.name:'?')}</h2><div class="sub">${esc(deu)} · ${esc(v?v.name:'Bestelakoak')} · ${tl(s.start)}–${tl(s.end)} (${fmtH(hrs(s))} h)<br>${esc(des)}</div>
+  <div class="list">${v&&v.slots.length>1?`<button class="opt" id="eSlot"><b>${T('Ordua aldatu','Cambiar hora')}</b></button>`:''}
+  <button class="opt" id="eCustom"><b>${T('Beste ordu bat','Otra hora')}</b><span class="r">${tl(s.start)}–${tl(s.end)}</span></button>
+  <button class="opt" id="eCook"><b>${T('Sukaldaria aldatu','Cambiar cocinero')}</b></button>
+  <button class="opt" id="eDel" style="color:var(--bad)"><b>${T('Ezabatu','Borrar')}</b></button></div>`);
+  if($('#eSlot'))$('#eSlot').onclick=()=>pickSlot(v,(z,custom)=>change(id,x=>{x.slot=z.id;x.start=custom?custom.start:z.start;x.end=custom?custom.end:z.end}),`${e.name} · ${deu}`,s.slot);
+  $('#eCustom').onclick=()=>customHours(s.start,s.end,(a,b)=>change(id,x=>{x.start=a;x.end=b}),`${e.name} · ${deu}`);
+  $('#eCook').onclick=()=>{openSheet(`<h2>${T('Nor?','¿Quién?')}</h2><div class="sub">${esc(deu)} · ${tl(s.start)}–${tl(s.end)}</div><div class="list">${cookOptions(s.date,s.id)}</div>`);
+    document.querySelectorAll('#sheet [data-emp]').forEach(b=>b.onclick=()=>change(id,x=>{x.emp=b.dataset.emp}))};
+  $('#eDel').onclick=()=>{snap();S.shifts=S.shifts.filter(x=>x.id!==id);save();closeSheet();render();toast(`${e?e.name:''}: ${'ezabatuta · borrado'}`,5000,true)};
+}
+function change(id,fn){const s=S.shifts.find(x=>x.id===id);if(!s)return;snap();fn(s);save();closeSheet();render();toast('Aldatuta · Cambiado',2500,true)}
+
+/* ---------- semana ---------- */
+function goWeek(n){st.week=addDays(st.week,7*n);render();window.scrollTo(0,0)}
+$('#prevW').onclick=()=>goWeek(-1);$('#nextW').onclick=()=>goWeek(1);
+async function copyPrev(){
+  const ids=kitchenIds(),cur=new Set(weekDays()),prev=weekDays().map(d=>ymd(addDays(parse(d),-7)));
+  const src=S.shifts.filter(s=>ids.has(s.emp)&&prev.includes(s.date));
+  if(!src.length){toast('Aurreko astea hutsik dago · La semana anterior está vacía',3500);return}
+  const n=S.shifts.filter(s=>ids.has(s.emp)&&cur.has(s.date)).length;
+  if(!await ask(n?`Aurreko astea kopiatu? Aste honetako ${n} txandak ordeztuko dira.`:'Aurreko astea kopiatu aste honetara?',n?`¿Copiar la semana anterior? Se sustituirán los ${n} turnos de esta semana.`:'¿Copiar la semana anterior en esta?','Kopiatu','Copiar'))return;
+  snap();S.shifts=S.shifts.filter(s=>!(ids.has(s.emp)&&cur.has(s.date)));
+  for(const s of src){const{lane,...rest}=s;S.shifts.push({...rest,id:uid(),date:ymd(addDays(parse(s.date),7))})}
+  save();render();toast(`${src.length} txanda kopiatuta · turnos copiados`,5000,true);
+}
+$('#copyBtn').onclick=copyPrev;
+
+/* ---------- horas ---------- */
+function openHours(){
+  const rows=cooks().filter(e=>!e.archived||weekHours(e)>0).map(e=>({e,h:weekHours(e)}));
+  openSheet(`<h2>${T('Orduak aste honetan','Horas de esta semana')}</h2><div class="sub">${esc(cap(weekTitle(st.week,'eu')))} · ${esc(weekTitle(st.week,'es'))}</div>
+  <table class="h"><thead><tr><th>${T('Sukaldaria','Cocinero')}</th><th>${T('Orduak','Horas')}</th><th>${T('Kontratua','Contrato')}</th><th>+/−</th></tr></thead><tbody>
+  ${rows.map(({e,h})=>{const c=typeof e.contract==='number'?e.contract:null,d=c==null?null:Math.round((h-c)*10)/10;return `<tr><td>${esc(e.name)}</td><td>${fmtH(h)}</td><td>${c==null?'—':fmtH(c)}</td><td class="${d>0?'ov':''}">${d==null?'':(d>0?'+':'')+fmtH(d)}</td></tr>`}).join('')}
+  </tbody></table><div class="btns"><button class="btn" id="hClose">${T('Itxi','Cerrar')}</button></div>`);
+  $('#hClose').onclick=closeSheet;
+}
+$('#hoursBtn').onclick=openHours;
+
+/* ---------- cocineros ---------- */
+function openCooks(){
+  const list=cooks();
+  openSheet(`<h2>${T('Sukaldariak','Cocineros')}</h2><div class="sub">${T('Izena, asteko kontratuko orduak eta aktibo dagoen.','Nombre, horas de contrato por semana y si está activo.')}</div>
+  <div id="cookList">${list.map(e=>`<div class="cook" data-id="${e.id}"><input type="text" value="${esc(e.name)}" maxlength="30" aria-label="Izena · Nombre"><input class="ct" type="number" inputmode="decimal" min="0" max="80" step="0.5" value="${typeof e.contract==='number'?e.contract:''}" placeholder="h" aria-label="Kontratua · Contrato"><button class="tg${e.archived?' off':''}">${e.archived?'Ez aktiboa':'Aktiboa'}</button></div>`).join('')}</div>
+  <label class="field">${T('Berriak (komaz bereizita)','Nuevos (separados por comas)')}<textarea id="newCooks" rows="2" placeholder="Markel, Jimmy, Txotxe…"></textarea></label>
+  <div class="btns"><button class="btn" id="cNo">${T('Utzi','Cancelar')}</button><button class="btn pri" id="cOk">${T('Gorde','Guardar')}</button></div>`);
+  document.querySelectorAll('#cookList .tg').forEach(b=>b.onclick=()=>{const off=!b.classList.contains('off');b.classList.toggle('off',off);b.textContent=off?'Ez aktiboa':'Aktiboa'});
+  $('#cNo').onclick=closeSheet;
+  $('#cOk').onclick=()=>{
+    snap();
+    for(const row of document.querySelectorAll('#cookList .cook')){const e=emp(row.dataset.id);if(!e)continue;
+      const nm=row.querySelector('input[type=text]').value.trim();if(nm)e.name=nm.slice(0,30);
+      const c=row.querySelector('.ct').value.trim().replace(',','.');const n=parseFloat(c);
+      if(c===''||!(n>=0&&n<=168))delete e.contract;else e.contract=Math.round(n*2)/2;
+      if(row.querySelector('.tg').classList.contains('off'))e.archived=true;else delete e.archived}
+    const names=$('#newCooks').value.split(/[,\n;]+/).map(x=>x.trim()).filter(Boolean);
+    const have=new Set(cooks().map(e=>e.name.toLowerCase()));
+    for(const nm of names){if(have.has(nm.toLowerCase()))continue;have.add(nm.toLowerCase());
+      S.employees.push({id:uid(),name:nm.slice(0,30),color:COOK_PAL[cooks().length%COOK_PAL.length],section:'sukaldea'})}
+    save();closeSheet();render();toast('Gordeta · Guardado',1800);
+  };
+}
+
+/* ---------- menú ---------- */
+$('#menuBtn').onclick=()=>{
+  openSheet(`<h2>${T('Menua','Menú')}</h2><div class="list">
+  <button class="opt" id="mToday"><b>${T('Aste hau','Esta semana')}</b></button>
+  <button class="opt" id="mCooks"><b>${T('Sukaldariak','Cocineros')}</b></button>
+  <button class="opt" id="mBk"><b>${T('Babeskopia gorde','Guardar copia de seguridad')}</b></button>
+  <button class="opt" id="mImp"><b>${T('Babeskopia kargatu','Cargar copia de seguridad')}</b></button>
+  <button class="opt" id="mUndo"${hist.length?'':' disabled'}><b>${T('Desegin','Deshacer')}</b></button>
+  </div><div class="sub" style="margin-top:12px">Irati Sukaldea mugikorra ${VERSION} · Kudeo</div>`);
+  $('#mToday').onclick=()=>{st.week=monday(new Date());closeSheet();render()};
+  $('#mCooks').onclick=openCooks;$('#mBk').onclick=()=>{closeSheet();exportBackup()};
+  $('#mImp').onclick=()=>{closeSheet();$('#fileIn').click()};$('#mUndo').onclick=()=>{closeSheet();undo()};
+};
+
+/* ---------- compartir / descargar (con alternativas) ---------- */
+// 1) menú de compartir del móvil; 2) descarga; 3) se enseña en pantalla para mantener pulsado o copiar.
+async function shareFile(blob,name,title){
+  try{const f=new File([blob],name,{type:blob.type});
+    if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title});return 'shared'}}
+  catch(e){if(e&&e.name==='AbortError')return 'cancel'}
+  return null;
+}
+function download(blob,name){
+  try{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),60000);return true}catch(e){return false}
+}
+
+/* ---------- copia de seguridad ---------- */
+async function exportBackup(){
+  S.settings.movilBackup=new Date().toISOString();
+  const json=JSON.stringify(S,null,1),name=`irati-sukaldea-mugikorra-${ymd(new Date())}.json`;
+  const blob=new Blob([json],{type:'application/json'});
+  const r=await shareFile(blob,name,'Irati Sukaldea · babeskopia');
+  if(r==='shared'){save();renderBanners();toast('Babeskopia bidalita · Copia enviada',3000);return}
+  if(r==='cancel'){delete S.settings.movilBackup;return}
+  openSheet(`<h2>${T('Babeskopia','Copia de seguridad')}</h2><div class="hint">${T('Gorde fitxategia Deskargetan edo bidali zeure buruari (Drive, WhatsApp).','Guarda el archivo en Descargas o mándatelo (Drive, WhatsApp).')}</div>
+  <div class="btns"><button class="btn pri" id="bDl">${T('Deskargatu','Descargar')}</button><button class="btn" id="bCopy">${T('Testua kopiatu','Copiar texto')}</button></div>
+  <label class="field">${T('Edo kopiatu hau eskuz:','O copia esto a mano:')}<textarea id="bTxt" rows="4" readonly></textarea></label><div class="btns"><button class="btn" id="bClose">${T('Itxi','Cerrar')}</button></div>`);
+  $('#bTxt').value=json;
+  $('#bDl').onclick=()=>{download(blob,name);save();renderBanners();toast('Deskargatuta · Descargado',2500)};
+  $('#bCopy').onclick=async()=>{try{await navigator.clipboard.writeText(json);save();renderBanners();toast('Kopiatuta · Copiado',2000)}catch(e){$('#bTxt').focus();$('#bTxt').select();toast('Hautatu eta kopiatu · Selecciona y copia',3000)}};
+  $('#bClose').onclick=closeSheet;
+}
+$('#fileIn').onchange=async e=>{
+  const f=e.target.files[0];e.target.value='';if(!f)return;
+  let d=null;try{d=JSON.parse(await f.text())}catch(x){}
+  importData(d);
+};
+async function importData(d){
+  if(!valid(d)){toast('Fitxategi hau ez da Iratiren babeskopia · No es una copia de Irati',5000);return}
+  if(!d.employees.some(x=>x.section==='sukaldea')){toast('Babeskopia hau Barrarena da, ez Sukaldearena · Esta copia es de Barra',6000);return}
+  const n=d.shifts.length;
+  if((S.shifts.length||cooks().length)&&!await ask(`Babeskopia kargatu? (${n} txanda) Uneko datuak ordeztuko dira.`,`¿Cargar la copia? (${n} turnos) Se sustituirán los datos actuales.`,'Kargatu','Cargar'))return;
+  snap();S=norm(d);storeMsg='';save();render();toast('Babeskopia kargatuta · Copia cargada',3000,true);
+}
+
+/* ---------- imagen de la semana ---------- */
+function drawWeek(){
+  const days=weekDays(),W=1080,P=24,LW=118,CW=(W-P*2-LW)/7,RH=50,HH=96,DH=70;
+  const svcs=svcList().map(v=>{const per=days.map(d=>dayShifts(d).filter(s=>s.task===v.id).sort(sortShifts));return {v,per,n:Math.max(...per.map(p=>p.length))}}).filter(r=>r.n>0||r.v.id!=='lunch').map(r=>({...r,n:Math.max(r.n,1)}));
+  const restPer=days.map(d=>dayShifts(d).filter(s=>!svc(s.task)).sort(sortShifts)),restN=Math.max(0,...restPer.map(p=>p.length));
+  if(restN)svcs.push({v:null,per:restPer,n:restN});
+  const hrsRows=active().concat(cooks().filter(e=>e.archived&&weekHours(e)>0)).map(e=>({e,h:weekHours(e)})).filter(r=>r.h>0);
+  const legend=S.services.flatMap(v=>v.slots.map(z=>({v,z}))).filter(x=>x.v.id!=='lunch'||days.some(d=>dayShifts(d).some(s=>s.task==='lunch')));
+  const gridH=svcs.reduce((a,r)=>a+r.n*RH+6,0);
+  const hCols=4,hRowsN=Math.ceil(hrsRows.length/hCols),lCols=2,lRowsN=Math.ceil(legend.length/lCols);
+  const H=HH+DH+gridH+30+(hRowsN?44+hRowsN*40:0)+20+lRowsN*40+P;
+  const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+  g.fillStyle='#fff';g.fillRect(0,0,W,H);
+  g.fillStyle='#1d1d1b';g.fillRect(0,0,W,HH);
+  g.fillStyle='#fff';g.textBaseline='middle';g.font='800 34px system-ui,sans-serif';g.fillText('IRATI · SUKALDEA',P,HH/2-12);
+  g.font='400 24px system-ui,sans-serif';g.fillText(`${cap(weekTitle(st.week,'eu'))} · ${weekTitle(st.week,'es')} ${st.week.getFullYear()}`,P,HH/2+22);
+  let y=HH;
+  // cabecera de días
+  days.forEach((d,i)=>{const x=P+LW+i*CW,dt=parse(d);g.fillStyle=i>=5?'#efe9dd':'#f6f3ee';g.fillRect(x+1,y+6,CW-2,DH-10);
+    g.fillStyle='#1d1d1b';g.textAlign='center';g.font='700 22px system-ui,sans-serif';g.fillText(`${DS_EU[i]} · ${DS_ES[i]}`,x+CW/2,y+26);
+    g.font='800 26px system-ui,sans-serif';g.fillText(String(dt.getDate()),x+CW/2,y+52)});
+  g.textAlign='left';y+=DH;
+  for(const r of svcs){
+    const top=y;g.fillStyle='#f6f3ee';g.fillRect(P,top,LW-6,r.n*RH);
+    g.fillStyle='#1d1d1b';g.font='700 19px system-ui,sans-serif';
+    g.fillText(r.v?r.v.name:'Bestelakoak',P+8,top+Math.min(r.n*RH,RH)/2-9);g.font='400 15px system-ui,sans-serif';g.fillStyle='#6b6760';g.fillText(r.v?svcEs(r.v):'Otros',P+8,top+Math.min(r.n*RH,RH)/2+12);
+    r.per.forEach((list,i)=>{const x=P+LW+i*CW;
+      for(let k=0;k<r.n;k++){const s=list[k],yy=top+k*RH;
+        if(!s){g.strokeStyle='#eceae4';g.strokeRect(x+1.5,yy+1.5,CW-3,RH-3);continue}
+        const z=slotOf(s),bg=z?z.color:NOSVC,e=emp(s.emp);g.fillStyle=bg;g.fillRect(x+1,yy+1,CW-2,RH-2);
+        g.strokeStyle='#00000026';g.strokeRect(x+1.5,yy+1.5,CW-3,RH-3);
+        g.fillStyle=textOn(bg);g.textAlign='center';
+        if(offSlot(s)){g.font='700 19px system-ui,sans-serif';g.fillText(fit(g,e?e.name:'?',CW-10),x+CW/2,yy+16);
+          const t=`${tl(s.start)}–${tl(s.end)}`;g.font='700 15px system-ui,sans-serif';const tw=g.measureText(t).width+10;g.fillStyle='#000';g.fillRect(x+CW/2-tw/2,yy+28,tw,19);g.fillStyle='#fff';g.fillText(t,x+CW/2,yy+38)}
+        else{g.font='700 21px system-ui,sans-serif';g.fillText(fit(g,e?e.name:'?',CW-10),x+CW/2,yy+RH/2)}
+        g.textAlign='left'}});
+    y+=r.n*RH+6;
+  }
+  y+=30;
+  if(hRowsN){g.fillStyle='#1d1d1b';g.font='700 22px system-ui,sans-serif';g.fillText('Orduak · Horas',P,y+10);y+=34;
+    const cw=(W-P*2)/hCols;hrsRows.forEach((r,i)=>{const x=P+(i%hCols)*cw,yy=y+Math.floor(i/hCols)*40;g.fillStyle='#f6f3ee';g.fillRect(x+2,yy,cw-4,34);
+      g.fillStyle='#1d1d1b';g.font='600 20px system-ui,sans-serif';g.fillText(fit(g,r.e.name,cw-80),x+12,yy+17);g.textAlign='right';g.font='800 20px system-ui,sans-serif';g.fillText(fmtH(r.h)+' h',x+cw-12,yy+17);g.textAlign='left'});
+    y+=hRowsN*40+10}
+  y+=10;
+  const lw=(W-P*2)/lCols;legend.forEach((x,i)=>{const xx=P+(i%lCols)*lw,yy=y+Math.floor(i/lCols)*40;g.fillStyle=x.z.color;g.fillRect(xx+2,yy,lw-4,34);g.strokeStyle='#00000026';g.strokeRect(xx+2.5,yy+.5,lw-5,33);
+    g.fillStyle=textOn(x.z.color);g.font='600 19px system-ui,sans-serif';g.fillText(`${x.v.name} · ${tl(x.z.start)}–${tl(x.z.end)} · ${fmtH((x.z.end-x.z.start)/2)}h`,xx+12,yy+17)});
+  return c;
+}
+function fit(g,t,w){if(g.measureText(t).width<=w)return t;while(t.length>1&&g.measureText(t+'…').width>w)t=t.slice(0,-1);return t+'…'}
+async function shareImage(){
+  const ds=new Set(weekDays()),n=S.shifts.filter(s=>ds.has(s.date)&&kitchenIds().has(s.emp)).length;
+  if(!n){toast('Aste hau hutsik dago · Esta semana está vacía',3000);return}
+  const c=drawWeek(),name=`irati-sukaldea-${ymd(st.week)}.png`;
+  const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+  const r=blob?await shareFile(blob,name,'Irati Sukaldea'):null;
+  if(r==='shared'||r==='cancel')return;
+  // alternativa: se enseña la imagen para mantenerla pulsada (Compartir / Descargar imagen)
+  const url=c.toDataURL('image/png');
+  openSheet(`<h2>${T('Asteko irudia','Imagen de la semana')}</h2><div class="hint">${T('Luze sakatu irudia → Partekatu edo Deskargatu.','Mantén pulsada la imagen → Compartir o Descargar imagen.')}</div><div class="imgview"><img id="wkImg" alt="Irati Sukaldea" src="${url}"></div>
+  <div class="btns"><button class="btn" id="iDl">${T('Deskargatu','Descargar')}</button><button class="btn" id="iClose">${T('Itxi','Cerrar')}</button></div>`);
+  $('#iDl').onclick=()=>{if(blob&&download(blob,name))toast('Deskargatuta · Descargado',2500)};$('#iClose').onclick=closeSheet;
+}
+$('#imgBtn').onclick=shareImage;
+
+/* ---------- aviso ---------- */
+let tT=null;
+function toast(msg,ms=2200,withUndo=false){
+  $('#toastTxt').textContent=msg;const b=$('#toastBtn');b.hidden=!withUndo||!hist.length;b.innerHTML='Desegin · Deshacer';b.onclick=()=>{$('#toast').classList.remove('on');undo()};
+  $('#toast').classList.add('on');clearTimeout(tT);tT=setTimeout(()=>$('#toast').classList.remove('on'),ms);
+}
+
+/* ---------- arranque ---------- */
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{})}catch(e){}
+if(!storeOK)renderBanners();
+render();
+window.IRATI_MOVIL={get S(){return S},valid,drawWeek,importData,VERSION};
+</script>
+</body>
+</html>
